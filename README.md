@@ -4,7 +4,7 @@ Graças a esse codigo consegui tirar som dessas teclas novamente usando:
 **Arduino Mega >[Hairless MIDI](https://projectgus.github.io/hairless-midiserial/)> [loopMIDI](https://www.tobias-erichsen.de/software/loopmidi.html) > [kontakt](https://www.native-instruments.com/en/products/komplete/samplers/kontakt-6/).**  
 É necessario utilizar a biblioteca [DIO2](https://github.com/FryDay/DIO2) para que tudo funcione corretamente.</p>
 </p>
-Um grande agradecimento ao [Daniel Moura](https://github.com/oxesoft) criador desse codigo o qual eu estou adaptando e também ao Jacob Hobbs o qual estou utilizando muito de suas sugestões de melhoria para o codigo.</p>
+Um grande agradecimento ao Daniel Moura, o criador desse codigo o qual eu estou adaptando e também ao Jacob Hobbs o qual estou utilizando muito de suas sugestões de melhoria para o codigo.</p>
 
 **Alterações do codigo original:**
 1. Estou utilizando a função micros no lugar da millis, segundo Jacob isso proporciona uma sensibilidade mais fluida.
