@@ -1,39 +1,12 @@
-# Moura's Keyboard Scanner
-Turn your broken (or unused) keyboard in a MIDI controller (with pedal and veloticy)
+Adaptação para o teclado Roland Juno.
+Autorizada da Roland se recusou a consertar o teclado, alegando ser um modelo muito antigo e não ter mais as peças em estoque.
+Graças a esse codigo consegui tirar som dessas teclas novamente.
+Usando Arduino Mega >hairless-midiserial> loopMIDI > kontakt
+Um grande agradecimento ao Daniel Moura criador desse codigo o qual eu estou adaptando e também ao Jacob Hobbs o qual estou utilizando muito de suas sugestões de melhoria para o codigo. 
 
-This Arduino sketch was the one that I used to make the project demonstrated
-in [this](https://www.youtube.com/watch?v=z840N9P-T2k) video.
-It is about a keyboard controller that I've made using an old Alesis QS6 Keyboard
-directly connected to an Arduino Mega rev3 acting as keyboard scanner with 
-velocity reading and sustain pedal support.
-
-In 2017 I did the same with another keyboard (an old Casio from a friend).
-The code was refactored and a great library called [DIO2](https://github.com/FryDay/DIO2)
-was used to speed up the scanning and clean up the old code.
-
-In 2020, thanks to Leandro Meucchi, from Argentina, the code is simpler to be used with any keyboard.
-He made the PDF showing the keyboard wiring for Yamaha PSR530 keyboard, that helps a lot do understand what needs to be done.
-
-Warning: this sketch is for keyboard with velocity support only.
-
-![keyboardscanner](https://raw.githubusercontent.com/oxesoft/keyboardscanner/master/keyboardscanner.jpg)
-
-## How velocity works
-Normally it is a ribbon rubber with two contacts for each key that touch the board in two diffent moments:
-since the key was pressed until it slopes the board completly. The code measure the difference, varying between
-2 and 120 ms, depending on the keyboard. It is transformed in a MIDI value from 0 to 127.
-
-## Diagram of one key
-This scheme makes clear how to identify input and output pins. This has been the main question of guys on Youtube.
-I hope it helps:
+Alterações do codigo original:
+1- Estou utilizando a função micros no lugar da millis, segundo Jacob isso proporciona uma sensibilidade mais fluida.
+2- Ao apertar uma tecla com força minima foi atribuido um valor minimo no lugar de zero, o que antes dava a impressão da tecla não ser apertada, agora é tocado um som bem baixo.
+3- Estou fazendo algumas alterações no pedal de sustenido pois antes não havia funcionado comigo.
 
 ![key](https://raw.githubusercontent.com/oxesoft/keyboardscanner/master/key_scheme.png)
-
-## How to make your own MIDI controller
-1) Disassemble the keyboard to have access to the flat cables (one, two or even three, depending on the number of keys and manufacturer);
-2) Using a multimeter with the diode testing function selected, find out and understand the matrix, starting from the first key. Some keyboards have a logical pattern, some doesn't;
-3) Connect the ribbon pins **directly** to the Arduino Mega (because it has enough pins to connect any keyboard with velocity). You **dont't** need to change anything in the keyboard circuit board;
-4) Change the pins in the code (output_pins + input_pins), uncomment DEBUG_MIDI_MESSAGE and see the console output;
-5) If the MIDI messages looks OK, comment DEBUG_MIDI_MESSAGE back and use some Serial<->MIDI Bridge like the excelent [Hairless](https://projectgus.github.io/hairless-midiserial/);
-6) If everything goes well, consider turn you Arduino in a MIDI interface using [HIDUINO](https://github.com/ddiakopoulos/hiduino) or similar firmware.
-7) Enjoy!
