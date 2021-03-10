@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <DIO2.h> // install the library DIO2
 
 #define KEYS_NUMBER 61
-
 #define KEY_OFF               0
 #define KEY_START             1
 #define KEY_ON                2
@@ -29,8 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define KEY_SUSTAINED         4
 #define KEY_SUSTAINED_RESTART 5
 
-#define MIN_TIME_MS   3
-#define MAX_TIME_MS   50
+#define MIN_TIME_MS   3000//tempo agora em microsegundos
+#define MAX_TIME_MS   30000//ajuste entre 20000 até 80000
 #define MAX_TIME_MS_N (MAX_TIME_MS - MIN_TIME_MS)
 
 #define PEDAL_PIN     21
@@ -41,278 +40,278 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //the following configuration is specific for PSR530
 //thanks Leandro Meucchi, from Argentina, by the PDF
 //take a look at the scheme detailed in PSR530.pdf and modify the following mapping according to the wiring of your keyboard
-#define PIN_A1  33
-#define PIN_A2  32
-#define PIN_A3  31
-#define PIN_A4  30
-#define PIN_A5  29
-#define PIN_A6  28
-#define PIN_A7  27
-#define PIN_A8  26
-#define PIN_A9  25
-#define PIN_A10 24
-#define PIN_A11 23
-#define PIN_A12 22
-#define PIN_B1  40
-#define PIN_B2  39
-#define PIN_B3  38
-#define PIN_B4  37
-#define PIN_B5  36
-#define PIN_B6  35
-#define PIN_B7  34
-#define PIN_C1  45
-#define PIN_C2  44
-#define PIN_C3  43
-#define PIN_C4  42
-#define PIN_C5  41
+#define PIN_A1 44
+#define PIN_A2 45
+#define PIN_A3 46
+#define PIN_A4 47
+#define PIN_A5 42
+#define PIN_A6 43
+#define PIN_A7 40
+#define PIN_A8 41
+#define PIN_A9 48
+#define PIN_A10 49
+#define PIN_A11 38
+#define PIN_A12 39
+#define PIN_B1 35
+#define PIN_B2 36
+#define PIN_B3 37
+#define PIN_B4 50
+#define PIN_B5 34
+#define PIN_B6 32
+#define PIN_B7 33
+#define PIN_C1 28
+#define PIN_C2 29
+#define PIN_C3 30
+#define PIN_C4 31
+#define PIN_C5 51
 
 byte output_pins[] = {
-    PIN_B6, //C0
-    PIN_B6,
-    PIN_B7,
-    PIN_B7,
-    PIN_B7,
-    PIN_B7,
-    PIN_B7,
-    PIN_B7,
-    PIN_B7,
-    PIN_B7,
-    PIN_B7,
-    PIN_B7,
-    PIN_B7,
-    PIN_B7,
-    PIN_B5,
-    PIN_B5,
-    PIN_B5,
-    PIN_B5,
-    PIN_B5,
-    PIN_B5,
-    PIN_B5,
-    PIN_B5,
-    PIN_B5,
-    PIN_B5,
-    PIN_B5, //C1
-    PIN_B5,
-    PIN_B4,
-    PIN_B4,
-    PIN_B4,
-    PIN_B4,
-    PIN_B4,
-    PIN_B4,
-    PIN_B4,
-    PIN_B4,
-    PIN_B4,
-    PIN_B4,
-    PIN_B4,
-    PIN_B4,
-    PIN_B3,
-    PIN_B3,
-    PIN_B3,
-    PIN_B3,
-    PIN_B3,
-    PIN_B3,
-    PIN_B3,
-    PIN_B3,
-    PIN_B3,
-    PIN_B3,
-    PIN_B3, //C2
-    PIN_B3,
-    PIN_B2,
-    PIN_B2,
-    PIN_B2,
-    PIN_B2,
-    PIN_B2,
-    PIN_B2,
-    PIN_B2,
-    PIN_B2,
-    PIN_B2,
-    PIN_B2,
-    PIN_B2,
-    PIN_B2,
-    PIN_B1,
-    PIN_B1,
-    PIN_B1,
-    PIN_B1,
-    PIN_B1,
-    PIN_B1,
-    PIN_C1,
-    PIN_C1,
-    PIN_C1,
-    PIN_C1,
-    PIN_C1, //C3
-    PIN_C1,
-    PIN_C2,
-    PIN_C2,
-    PIN_C2,
-    PIN_C2,
-    PIN_C2,
-    PIN_C2,
-    PIN_C2,
-    PIN_C2,
-    PIN_C2,
-    PIN_C2,
-    PIN_C2,
-    PIN_C2,
-    PIN_C3,
-    PIN_C3,
-    PIN_C3,
-    PIN_C3,
-    PIN_C3,
-    PIN_C3,
-    PIN_C3,
-    PIN_C3,
-    PIN_C3,
-    PIN_C3,
-    PIN_C3, //C4
-    PIN_C3,
-    PIN_C4,
-    PIN_C4,
-    PIN_C4,
-    PIN_C4,
-    PIN_C4,
-    PIN_C4,
-    PIN_C4,
-    PIN_C4,
-    PIN_C4,
-    PIN_C4,
-    PIN_C4,
-    PIN_C4,
-    PIN_C5,
-    PIN_C5,
-    PIN_C5,
-    PIN_C5,
-    PIN_C5,
-    PIN_C5,
-    PIN_C5,
-    PIN_C5,
-    PIN_C5,
-    PIN_C5,
-    PIN_C5, //C5
-    PIN_C5
+PIN_B6, //C0
+PIN_B6,
+PIN_B7,//C#0
+PIN_B7,
+PIN_B5,//D0
+PIN_B5,
+PIN_B1,//D#0
+PIN_B1,
+PIN_C1,//E0
+PIN_C1,
+PIN_C2,//F0
+PIN_C2,
+PIN_C3,//F#0
+PIN_C3,
+PIN_C4,//G0
+PIN_C4,
+PIN_B6,//G#0
+PIN_B6,
+PIN_B7,//A0
+PIN_B7,
+PIN_B5,//A#0
+PIN_B5,
+PIN_B1,//B0
+PIN_B1,
+PIN_C1, //C1
+PIN_C1,
+PIN_C2,//C#1
+PIN_C2,
+PIN_C3,//D1
+PIN_C3,
+PIN_C4,//D#1
+PIN_C4,
+PIN_B6,//E1
+PIN_B6,
+PIN_B7,//F1
+PIN_B7,
+PIN_B5,//F#1
+PIN_B5,
+PIN_B1,//G1
+PIN_B1,
+PIN_C1,//G#1
+PIN_C1,
+PIN_C2,//A1
+PIN_C2,
+PIN_C3,//A#1
+PIN_C3,
+PIN_C4,//B1
+PIN_C4,
+PIN_B6, //C2
+PIN_B6,
+PIN_B7,//C#2
+PIN_B7,
+PIN_B5,//D2
+PIN_B5,
+PIN_B1,//D#2
+PIN_B1,
+PIN_C1,//E2
+PIN_C1,
+PIN_C2,//F2
+PIN_C2,
+PIN_C3,//F#2
+PIN_C3,
+PIN_C4,//G2
+PIN_C4,
+PIN_B6,//G#2
+PIN_B6,
+PIN_B7,//A2
+PIN_B7,
+PIN_B5,//A#2
+PIN_B5,
+PIN_B1,//B2
+PIN_B1,
+PIN_C1, //C3
+PIN_C1,
+PIN_C2,//C#3
+PIN_C2,
+PIN_C3,//D3
+PIN_C3,
+PIN_C4,//D#3
+PIN_C4,
+PIN_B6,//E3
+PIN_B6,
+PIN_B7,//F3
+PIN_B7,
+PIN_B5,//F#3
+PIN_B5,
+PIN_B1,//G3
+PIN_B1,
+PIN_C1,//G#3
+PIN_C1,
+PIN_C2,//A3
+PIN_C2,
+PIN_C3,//A#3
+PIN_C3,
+PIN_C4,//B3
+PIN_C4,
+PIN_B6, //C4
+PIN_B6,
+PIN_B7,//C#4
+PIN_B7,
+PIN_B5,//D4
+PIN_B5,
+PIN_B1,//D#4
+PIN_B1,
+PIN_C1,//E4
+PIN_C1,
+PIN_C2,//F4
+PIN_C2,
+PIN_C3,//F#4
+PIN_C3,
+PIN_C4,//G4
+PIN_C4,
+PIN_B6,//G#4
+PIN_B6,
+PIN_B7,//A4
+PIN_B7,
+PIN_B5,//A#4
+PIN_B5,
+PIN_B1,//B4
+PIN_B1,
+PIN_C1, //C5
+PIN_C1
 };
 byte input_pins[] = {
-    PIN_A9, //C0
-    PIN_A10,
-    PIN_A9,
-    PIN_A10,
-    PIN_A6,
-    PIN_A5,
-    PIN_A8,
-    PIN_A7,
-    PIN_A3,
-    PIN_A4,
-    PIN_A1,
-    PIN_A2,
-    PIN_A11,
-    PIN_A12,
-    PIN_A11,
-    PIN_A12,
-    PIN_A1,
-    PIN_A2,
-    PIN_A3,
-    PIN_A4,
-    PIN_A8,
-    PIN_A7,
-    PIN_A6,
-    PIN_A5,
-    PIN_A9, //C1
-    PIN_A10,
-    PIN_A9,
-    PIN_A10,
-    PIN_A6,
-    PIN_A5,
-    PIN_A8,
-    PIN_A7,
-    PIN_A3,
-    PIN_A4,
-    PIN_A1,
-    PIN_A2,
-    PIN_A11,
-    PIN_A12,
-    PIN_A11,
-    PIN_A12,
-    PIN_A1,
-    PIN_A2,
-    PIN_A3,
-    PIN_A4,
-    PIN_A8,
-    PIN_A7,
-    PIN_A6,
-    PIN_A5,
-    PIN_A9, //C2
-    PIN_A10,
-    PIN_A9,
-    PIN_A10,
-    PIN_A1,
-    PIN_A2,
-    PIN_A6,
-    PIN_A5,
-    PIN_A8,
-    PIN_A7,
-    PIN_A3,
-    PIN_A4,
-    PIN_A11,
-    PIN_A12,
-    PIN_A11,
-    PIN_A12,
-    PIN_A3,
-    PIN_A4,
-    PIN_A9,
-    PIN_A10,
-    PIN_A6,
-    PIN_A5,
-    PIN_A8,
-    PIN_A7,
-    PIN_A1, //C3
-    PIN_A2,
-    PIN_A1,
-    PIN_A2,
-    PIN_A6,
-    PIN_A5,
-    PIN_A8,
-    PIN_A7,
-    PIN_A3,
-    PIN_A4,
-    PIN_A9,
-    PIN_A10,
-    PIN_A11,
-    PIN_A12,
-    PIN_A11,
-    PIN_A12,
-    PIN_A1,
-    PIN_A2,
-    PIN_A3,
-    PIN_A4,
-    PIN_A8,
-    PIN_A7,
-    PIN_A6,
-    PIN_A5,
-    PIN_A9, //C4
-    PIN_A10,
-    PIN_A9,
-    PIN_A10,
-    PIN_A11,
-    PIN_A12,
-    PIN_A6,
-    PIN_A5,
-    PIN_A8,
-    PIN_A7,
-    PIN_A3,
-    PIN_A4,
-    PIN_A1,
-    PIN_A2,
-    PIN_A1,
-    PIN_A2,
-    PIN_A11,
-    PIN_A12,
-    PIN_A3,
-    PIN_A4,
-    PIN_A8,
-    PIN_A7,
-    PIN_A6,
-    PIN_A5,
-    PIN_A9, //C5
-    PIN_A10
+PIN_A9, //C0
+PIN_A10,
+PIN_A9,//C#0
+PIN_A10,
+PIN_A9,//D0
+PIN_A10,
+PIN_A9,//D#0
+PIN_A10,
+PIN_A3,//E0
+PIN_A4,
+PIN_A3,//F0
+PIN_A4,
+PIN_A3,//F#0
+PIN_A4,
+PIN_A3,//G0
+PIN_A4,
+PIN_A3,//G#0
+PIN_A4,
+PIN_A3,//A0
+PIN_A4,
+PIN_A3,//A#0
+PIN_A4,
+PIN_A3,//B0
+PIN_A4,
+PIN_A1, //C1
+PIN_A2,
+PIN_A1,//C#1
+PIN_A2,
+PIN_A1,//D1
+PIN_A2,
+PIN_A1,//D#1
+PIN_A2,
+PIN_A1,//E1
+PIN_A2,
+PIN_A1,//F1
+PIN_A2,
+PIN_A1,//F#1
+PIN_A2,
+PIN_A1,//G1
+PIN_A2,
+PIN_A5,//G#1
+PIN_A6,
+PIN_A5,//A1
+PIN_A6,
+PIN_A5,//A#1
+PIN_A6,
+PIN_A5,//B1
+PIN_A6,
+PIN_A5, //C2
+PIN_A6,
+PIN_A5,//C#2
+PIN_A6,
+PIN_A5,//D2
+PIN_A6,
+PIN_A5,//D#2
+PIN_A6,
+PIN_A7,//E2
+PIN_A8,
+PIN_A7,//F2
+PIN_A8,
+PIN_A7,//F#2
+PIN_A8,
+PIN_A7,//G2
+PIN_A8,
+PIN_A7,//G#2
+PIN_A8,
+PIN_A7,//A2
+PIN_A8,
+PIN_A7,//A#2
+PIN_A8,
+PIN_A7,//B2
+PIN_A8,
+PIN_A11, //C3
+PIN_A12,
+PIN_A11,//C#3
+PIN_A12,
+PIN_A11,//D3
+PIN_A12,
+PIN_A11,//D#3
+PIN_A12,
+PIN_A11,//E3
+PIN_A12,
+PIN_A11,//F3
+PIN_A12,
+PIN_A11,//F#3
+PIN_A12,
+PIN_A11,//G3
+PIN_A12,
+PIN_B2,//G#3
+PIN_B3,
+PIN_B2,//A3
+PIN_B3,
+PIN_B2,//A#3
+PIN_B3,
+PIN_B2,//B3
+PIN_B3,
+PIN_B2, //C4
+PIN_B3,
+PIN_B2,//C#4
+PIN_B3,
+PIN_B2,//D4
+PIN_B3,
+PIN_B2,//D#4
+PIN_B3,
+PIN_B4,//E4
+PIN_C5,
+PIN_B4,//F4
+PIN_C5,
+PIN_B4,//F#4
+PIN_C5,
+PIN_B4,//G4
+PIN_C5,
+PIN_B4,//G#4
+PIN_C5,
+PIN_B4,//A4
+PIN_C5,
+PIN_B4,//A#4
+PIN_C5,
+PIN_B4,//B4
+PIN_C5,
+PIN_A9, //C5
+PIN_A10
 };
 
 //cheap keyboards often has the black keys softer or harder than the white ones
@@ -366,7 +365,6 @@ void setup() {
         pinMode(input_pins[pin], INPUT_PULLUP);
     }
     pinMode(PEDAL_PIN, INPUT_PULLUP);
-    pedal_enabled = digitalRead(PEDAL_PIN) != HIGH;
 }
 
 void send_midi_event(byte status_byte, byte key_index, unsigned long time)
@@ -383,8 +381,7 @@ void send_midi_event(byte status_byte, byte key_index, unsigned long time)
     if (t < MIN_TIME_MS)
         t = MIN_TIME_MS;
     t -= MIN_TIME_MS;
-    unsigned long velocity = 127 - (t * 127 / MAX_TIME_MS_N);
-    byte vel = (((velocity * velocity) >> 7) * velocity) >> 7;
+    byte vel = 127 - map(t, 0, MAX_TIME_MS_N, 0, 90);// Onde esta o 90 é o som minimo produzido. Quanto maior, mais baixo ira sair. AJUSTE DE 0 - 127
     byte key = 36 + key_index;
 #ifdef DEBUG_MIDI_MESSAGE
     char out[32];
@@ -398,6 +395,8 @@ void send_midi_event(byte status_byte, byte key_index, unsigned long time)
 }
 
 void loop() {
+    byte pedal =LOW;                                    //PEDAL SUSTENIDO
+    pedal_enabled = digitalRead(PEDAL_PIN)!= HIGH ;     //PEDAL SUSTENIDO
 #ifdef DEBUG_SCANS_PER_SECOND
     static unsigned long cycles = 0;
     static unsigned long start = 0;
@@ -412,10 +411,13 @@ void loop() {
     }
 #endif
     byte pedal = LOW;
-    if (pedal_enabled)
+    if (pedal_enabled)  //PEDAL SUSTENIDO
     {
-        pedal = digitalRead2(PEDAL_PIN);
+        pedal = HIGH;
     }
+    else{
+        pedal = LOW;
+    }                  //PEDAL SUSTENIDO
    
     boolean *s = signals;
     for (byte i = 0; i < KEYS_NUMBER * 2; i++)
@@ -440,7 +442,7 @@ void loop() {
                 if (state_index == 0 && *signal)
                 {
                     *state = KEY_START;
-                    *ktime = millis();
+                    *ktime = micros();            //MUDANÇA PARA MICROS
                 }
                 break;
             case KEY_START:
@@ -452,14 +454,15 @@ void loop() {
                 if (state_index == 1 && *signal)
                 {
                     *state = KEY_ON;
-                    send_midi_event(0x90, key, millis() - *ktime);
+                    unsigned long t= micros() - *ktime;  //MUDANDO PARA MICROS E DEFINIR A DIFERANÇA ANTES DE ENVIAR PARA EVITAR ERRO DE TEMPO
+                    send_midi_event(0x90, key, t);
                 }
                 break;
             case KEY_ON:
                 if (state_index == 1 && !*signal)
                 {
                     *state = KEY_RELEASED;
-                    *ktime = millis();
+                    *ktime = micros();                   //MUDANDO PARA MICROS
                 }
                 break;
             case KEY_RELEASED:
@@ -471,7 +474,8 @@ void loop() {
                         break;
                     }
                     *state = KEY_OFF;
-                    send_midi_event(0x80, key, millis() - *ktime);
+                    unsigned long t= micros() - *ktime;  //MUDANDO PARA MICROS E DEFINIR A DIFERANÇA ANTES DE ENVIAR PARA EVITAR ERRO DE TEMPO
+                    send_midi_event(0x80, key, t);      //MUDANDO PARA MICROS
                 }
                 break;
             case KEY_SUSTAINED:
@@ -483,7 +487,7 @@ void loop() {
                 if (state_index == 0 && *signal)
                 {
                     *state = KEY_SUSTAINED_RESTART;
-                    *ktime = millis();
+                    *ktime = micros();                 //MUDANDO PARA MICROS
                 }
                 break;
             case KEY_SUSTAINED_RESTART:
@@ -497,7 +501,7 @@ void loop() {
                 {
                     *state = KEY_ON;
                     send_midi_event(0x80, key, MAX_TIME_MS);
-                    send_midi_event(0x90, key, millis() - *ktime);
+                    send_midi_event(0x90, key, micros() - *ktime);  //MUDANDO PARA MICROS
                 }
                 break;
             }
