@@ -12,7 +12,7 @@ Um grande agradecimento ao Daniel Moura, o criador desse codigo o qual eu estou 
 3. Estou fazendo algumas alterações no pedal de sustenido pois antes não havia funcionado comigo.
 4. Em um futuro proximo pretendo tentar implementar no codigo a utilizaçao dos potenciometros e dos botões para ajudar no controle do kontakt</p>
  
-**Placa:**
+**Placa:**</p>
 ![arduino](https://raw.githubusercontent.com/andersonbruno02/keyboardscanner/master/Arduino%20Mega.jpg)
 <p>O fio amarelo esta ligado na porta 21 do arduino
 <p>O fio vermelho esta ligano na porta GND
