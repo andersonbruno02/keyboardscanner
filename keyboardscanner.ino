@@ -34,6 +34,86 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define PEDAL_PIN     21
 
+//POTENCIOMETROS
+const int N_POTS = 2; //* número total de pots (slide e rotativo)
+const int POT_ARDUINO_PIN[N_POTS] = {A0, A1}; //* pinos de cada pot conectado diretamente ao Arduino
+int potCState[N_POTS] = {0}; // estado atual da porta analogica
+int potPState[N_POTS] = {0}; // estado previo da porta analogica
+int potVar = 0; // variacao entre o valor do estado previo e o atual da porta analogica
+int midiCState[N_POTS] = {0}; // Estado atual do valor midi
+int midiPState[N_POTS] = {0}; // Estado anterior do valor midi
+const int TIMEOUT = 300; //* quantidade de tempo em que o potenciometro sera lido apos ultrapassar o varThreshold
+const int varThreshold = 100; //* threshold para a variacao no sinal do potenciometro
+boolean potMoving = true; // se o potenciometro esta se movendo
+unsigned long PTime[N_POTS] = {0}; // tempo armazenado anteriormente
+unsigned long timer[N_POTS] = {0}; // armazena o tempo que passou desde que o timer foi zerado
+boolean pit =false;
+boolean mod=false;
+
+byte cc = 1; //* O mais baixo MIDI CC a ser usado
+void potentiometers() {
+  //Debug somente
+     /*for (int i = 0; i < N_POTS; i++) {
+      //Serial.print(potCState[i]); Serial.print(" ");
+      Serial.print(midiCState[i]); Serial.print(" ");
+     }
+    Serial.println();
+    */
+
+ for (int i = 0; i < N_POTS; i++) { // Faz o loop de todos os potenciômetros
+
+    potCState[i] = analogRead(POT_ARDUINO_PIN[i]);
+
+    midiCState[i] = map(potCState[i], 450, 880, 0, 127); // Mapeia a leitura do potCState para um valor utilizável em midi
+    if(i==1){
+    midiCState[i] = map(potCState[i], 215, 795, 0, 127);  
+    }
+
+    potVar = abs(potCState[i] - potPState[i]); // Calcula o valor absoluto entre a diferença entre o estado atual e o anterior do pot
+
+    if (potVar > varThreshold) { // Abre o portão se a variação do potenciômetro for maior que o limite (varThreshold)
+      PTime[i] = millis(); // Armazena o tempo anterior
+    }
+
+    timer[i] = millis() - PTime[i]; // Reseta o timer 11000 - 11000 = 0ms
+
+    if (timer[i] < TIMEOUT) { // Se o timer for menor que o tempo máximo permitido, significa que o potenciômetro ainda está se movendo
+      potMoving = true;
+      
+      
+    }
+    else {
+      potMoving = false;
+    }
+
+    if (potMoving == true) { // Se o potenciômetro ainda estiver em movimento, envie control change
+      if (midiPState[i] != midiCState[i]) {
+         if(i==1){//reservado para pitchbend
+         send_midi_eventcc(0xE0, cc+ i, midiCState[i]);
+         pit=false;
+         }else{// reservado para modulation wheel
+         send_midi_eventcc(0xB0, cc+ i, midiCState[i]);
+         mod=false;
+         }
+        potPState[i] = potCState[i]; // Armazena a leitura atual do potenciômetro para comparar com a próxima
+        midiPState[i] = midiCState[i];
+      }
+    }
+    if(potMoving==false){
+      if(midiCState[1]>57  && midiCState[1]<66 && pit==false){
+      midiCState[1]=64;
+      send_midi_eventcc(0xE0, 1, midiCState[1]);
+      pit=true;
+    }
+    if(midiCState[0]<10 && mod ==false){
+      midiCState[0]=0;
+      send_midi_eventcc(0xB0, 1, midiCState[0]);
+      mod=true;
+    }
+    }
+  }
+}
+
 //find out the pins using a multimeter, starting from the first key
 //see the picture key_scheme.png to understand how to map the inputs and outputs
 
@@ -393,8 +473,23 @@ void send_midi_event(byte status_byte, byte key_index, unsigned long time)
     Serial.write(vel);
 #endif
 }
+void send_midi_eventcc(byte status_byte, byte key_index, unsigned long time)
+{
+unsigned long t = time;
+#ifdef DEBUG_MIDI_MESSAGE
+char out[32];
+sprintf(out, "%02X %02X %03d %d", status_byte, key_index, vel, t);
+Serial.println(out);
+#else
+Serial.write(status_byte);
+Serial.write(key_index);
+Serial.write(t);
+#endif
+}
 
 void loop() {
+    
+    potentiometers();
     byte pedal =LOW;                                    //PEDAL SUSTENIDO
     pedal_enabled = digitalRead(PEDAL_PIN)!= HIGH ;     //PEDAL SUSTENIDO
 #ifdef DEBUG_SCANS_PER_SECOND
