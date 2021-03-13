@@ -9,8 +9,9 @@ Um grande agradecimento ao Daniel Moura, o criador desse codigo o qual eu estou 
 **Alterações do codigo original:**
 1. Estou utilizando a função micros no lugar da millis, segundo Jacob isso proporciona uma sensibilidade mais fluida.
 2. Ao apertar uma tecla com força minima foi atribuido um valor minimo no lugar de zero, o que antes dava a impressão da tecla não ser apertada, agora é tocado um som bem baixo.
-3. Estou fazendo algumas alterações no pedal de sustenido pois antes não havia funcionado comigo.
-4. Em um futuro proximo pretendo tentar implementar no codigo a utilizaçao dos potenciometros e dos botões para ajudar no controle do kontakt</p>
+3. Pedal de sustenido funciona, mas ainda precisa ser substituido por control change.
+4. Pitchbend wheel e modulation wheel funcionais
+5. Em breve adição de mais botões e potenciometros para control change</p>
  
 **Placa:**</p>
 ![arduino](https://raw.githubusercontent.com/andersonbruno02/keyboardscanner/master/Arduino%20Mega.jpg)
