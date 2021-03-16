@@ -505,7 +505,7 @@ void loop() {
         start = current;
     }
 #endif
-    byte pedal = LOW;
+    
     if (pedal_enabled)  //PEDAL SUSTENIDO
     {
         pedal = HIGH;
