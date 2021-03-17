@@ -19,20 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <DIO2.h> // install the library DIO2
-
 #define KEYS_NUMBER 61
-#define KEY_OFF               0
-#define KEY_START             1
-#define KEY_ON                2
-#define KEY_RELEASED          3
-#define KEY_SUSTAINED         4
-#define KEY_SUSTAINED_RESTART 5
+#define KEY_OFF 0
+#define KEY_START 1
+#define KEY_ON 2
+#define KEY_RELEASED 3
 
-#define MIN_TIME_MS   3000//tempo agora em microsegundos
-#define MAX_TIME_MS   30000//ajuste entre 20000 até 80000
-#define MAX_TIME_MS_N (MAX_TIME_MS - MIN_TIME_MS)
-
-#define PEDAL_PIN     21
+#define PEDAL_SUS 21
 
 //POTENCIOMETROS
 const int N_POTS = 2; //* número total de pots (slide e rotativo)
@@ -47,13 +40,11 @@ const int varThreshold = 100; //* threshold para a variacao no sinal do potencio
 boolean potMoving = true; // se o potenciometro esta se movendo
 unsigned long PTime[N_POTS] = {0}; // tempo armazenado anteriormente
 unsigned long timer[N_POTS] = {0}; // armazena o tempo que passou desde que o timer foi zerado
-boolean pit =false;
-boolean mod=false;
 
 byte cc = 1; //* O mais baixo MIDI CC a ser usado
 void potentiometers() {
-  //Debug somente
-     /*for (int i = 0; i < N_POTS; i++) {
+ /* //Debug somente
+     for (int i = 0; i < N_POTS; i++) {
       //Serial.print(potCState[i]); Serial.print(" ");
       Serial.print(midiCState[i]); Serial.print(" ");
      }
@@ -79,8 +70,6 @@ void potentiometers() {
 
     if (timer[i] < TIMEOUT) { // Se o timer for menor que o tempo máximo permitido, significa que o potenciômetro ainda está se movendo
       potMoving = true;
-      
-      
     }
     else {
       potMoving = false;
@@ -90,29 +79,22 @@ void potentiometers() {
       if (midiPState[i] != midiCState[i]) {
          if(i==1){//reservado para pitchbend
          send_midi_eventcc(0xE0, cc+ i, midiCState[i]);
-         pit=false;
          }else{// reservado para modulation wheel
          send_midi_eventcc(0xB0, cc+ i, midiCState[i]);
-         mod=false;
          }
         potPState[i] = potCState[i]; // Armazena a leitura atual do potenciômetro para comparar com a próxima
         midiPState[i] = midiCState[i];
       }
     }
-    if(potMoving==false){
-      if(midiCState[1]>57  && midiCState[1]<66 && pit==false){
-      midiCState[1]=64;
-      send_midi_eventcc(0xE0, 1, midiCState[1]);
-      pit=true;
-    }
-    if(midiCState[0]<10 && mod ==false){
-      midiCState[0]=0;
-      send_midi_eventcc(0xB0, 1, midiCState[0]);
-      mod=true;
-    }
-    }
   }
 }
+
+
+#define MIN_TIME_MS 3000
+#define MAX_TIME_MS 30000
+//20000 até 80000     entre foi melhor até agora3000  40000 
+#define MAX_TIME_MS_N (MAX_TIME_MS - MIN_TIME_MS)
+
 
 //find out the pins using a multimeter, starting from the first key
 //see the picture key_scheme.png to understand how to map the inputs and outputs
@@ -401,12 +383,12 @@ PIN_A10
 #ifdef BLACK_KEYS_CORRECTION
 #define MULTIPLIER 192 // 127 is the central value (corresponding to 1.0)
 byte black_keys[] = {
-    0,1,0,1,0,0,1,0,1,0,1,0,
-    0,1,0,1,0,0,1,0,1,0,1,0,
-    0,1,0,1,0,0,1,0,1,0,1,0,
-    0,1,0,1,0,0,1,0,1,0,1,0,
-    0,1,0,1,0,0,1,0,1,0,1,0,
-    0
+0,1,0,1,0,0,1,0,1,0,1,0,
+0,1,0,1,0,0,1,0,1,0,1,0,
+0,1,0,1,0,0,1,0,1,0,1,0,
+0,1,0,1,0,0,1,0,1,0,1,0,
+0,1,0,1,0,0,1,0,1,0,1,0,
+0
 };
 #endif
 
@@ -421,56 +403,68 @@ byte black_keys[] = {
 //uncoment the next line to get text midi message at output
 //#define DEBUG_MIDI_MESSAGE
 
-byte          keys_state[KEYS_NUMBER];
+byte keys_state[KEYS_NUMBER];
 unsigned long keys_time[KEYS_NUMBER];
-boolean       signals[KEYS_NUMBER * 2];
-boolean       pedal_enabled;
+boolean signals[KEYS_NUMBER * 2];
+boolean pedal_enabled;
+boolean is_sus;
+
+
 
 void setup() {
-    Serial.begin(115200);
-    pinMode(13, OUTPUT);
-    digitalWrite(13, LOW);
-    int i;
-    for (i = 0; i < KEYS_NUMBER; i++)
-    {
-        keys_state[i] = KEY_OFF;
-        keys_time[i] = 0;
-    }
-    for (byte pin = 0; pin < sizeof(output_pins); pin++)
-    {
-        pinMode(output_pins[pin], OUTPUT);
-    }
-    for (byte pin = 0; pin < sizeof(input_pins); pin++)
-    {
-        pinMode(input_pins[pin], INPUT_PULLUP);
-    }
-    pinMode(PEDAL_PIN, INPUT_PULLUP);
+  
+Serial.begin(115200);
+int i;
+for (i = 0; i < KEYS_NUMBER; i++)
+{
+keys_state[i] = KEY_OFF;
+keys_time[i] = 0;
 }
+for (byte pin = 0; pin < sizeof(output_pins); pin++)
+{
+pinMode(output_pins[pin], OUTPUT);
+}
+for (byte pin = 0; pin < sizeof(input_pins); pin++)
+{
+pinMode(input_pins[pin], INPUT_PULLUP);
+}
+pinMode(PEDAL_SUS, INPUT_PULLUP);
+is_sus = false;
+}
+
+
 
 void send_midi_event(byte status_byte, byte key_index, unsigned long time)
 {
-    unsigned long t = time;
+unsigned long t = time;
+
 #ifdef BLACK_KEYS_CORRECTION
-    if (black_keys[key_index])
-    {
-        t = (t * MULTIPLIER) >> 7;
-    }
+if (black_keys[key_index])
+{
+t = (t * MULTIPLIER) >> 7;
+}
 #endif
-    if (t > MAX_TIME_MS)
-        t = MAX_TIME_MS;
-    if (t < MIN_TIME_MS)
-        t = MIN_TIME_MS;
-    t -= MIN_TIME_MS;
-    byte vel = 127 - map(t, 0, MAX_TIME_MS_N, 0, 90);// Onde esta o 90 é o som minimo produzido. Quanto maior, mais baixo ira sair. AJUSTE DE 0 - 127
-    byte key = 36 + key_index;
+if (t > MAX_TIME_MS)
+t = MAX_TIME_MS;
+if (t < MIN_TIME_MS)
+t = MIN_TIME_MS;
+t -= MIN_TIME_MS;
+
+//unsigned long velocity = 127 - (t * 127 / MAX_TIME_MS_N);
+//byte vel = (((velocity * velocity) >> 7) * velocity) >> 7;
+byte vel = 127 - map(t, 0, MAX_TIME_MS_N, 0, 90);
+//byte vel = 127 - map(t, MIN_TIME_MS, MAX_TIME_MS, 1, 90);
+//Serial.println(vel);
+// 0 ou tempo minimo?
+byte key = 36 + key_index;
 #ifdef DEBUG_MIDI_MESSAGE
-    char out[32];
-    sprintf(out, "%02X %02X %03d %d", status_byte, key, vel, time);
-    Serial.println(out);
+char out[32];
+sprintf(out, "%02X %02X %03d %d", status_byte, key, vel, t);
+Serial.println(out);
 #else
-    Serial.write(status_byte);
-    Serial.write(key);
-    Serial.write(vel);
+Serial.write(status_byte);
+Serial.write(key);
+Serial.write(vel);
 #endif
 }
 void send_midi_eventcc(byte status_byte, byte key_index, unsigned long time)
@@ -487,122 +481,97 @@ Serial.write(t);
 #endif
 }
 
+
 void loop() {
-    
-    potentiometers();
-    byte pedal =LOW;                                    //PEDAL SUSTENIDO
-    pedal_enabled = digitalRead(PEDAL_PIN)!= HIGH ;     //PEDAL SUSTENIDO
-#ifdef DEBUG_SCANS_PER_SECOND
-    static unsigned long cycles = 0;
-    static unsigned long start = 0;
-    static unsigned long current = 0;
-    cycles++;
-    current = millis();
-    if (current - start >= 1000)
-    {
-        Serial.println(cycles);
-        cycles = 0;
-        start = current;
-    }
-#endif
-    
-    if (pedal_enabled)  //PEDAL SUSTENIDO
-    {
-        pedal = HIGH;
+//
+potentiometers();
+
+byte a = digitalRead(PEDAL_SUS);
+//Serial.println(a);
+if(a == 0){
+      if(is_sus == true){
+       send_midi_eventcc(0xB0, 64, 127);
+       is_sus = false; 
+      }
     }
     else{
-        pedal = LOW;
-    }                  //PEDAL SUSTENIDO
-   
-    boolean *s = signals;
-    for (byte i = 0; i < KEYS_NUMBER * 2; i++)
-    {
-        byte output_pin = output_pins[i];
-        byte input_pin = input_pins[i];
-        digitalWrite2(output_pin, LOW);
-        *(s++) = !digitalRead2(input_pin);
-        digitalWrite2(output_pin, HIGH);
+      if(is_sus == false){
+        send_midi_eventcc(0xB0, 64, 0);
+        is_sus = true;
+      }
     }
+#ifdef DEBUG_SCANS_PER_SECOND
+static unsigned long cycles = 0;
+static unsigned long start = 0;
+static unsigned long current = 0;
+cycles++;
+current = millis();
+if (current - start >= 1000)
+{
+Serial.println(cycles);
+cycles = 0;
+start = current;
+}
+#endif
 
-    byte          *state  = keys_state;
-    unsigned long *ktime  = keys_time;
-    boolean       *signal = signals;
-    for (byte key = 0; key < KEYS_NUMBER; key++)
+boolean *s = signals;
+for (byte i = 0; i < KEYS_NUMBER * 2; i++)
+{
+    byte output_pin = output_pins[i];
+    byte input_pin = input_pins[i];
+    digitalWrite2(output_pin, LOW);
+    *(s++) = !digitalRead2(input_pin);
+    digitalWrite2(output_pin, HIGH);
+}
+
+byte          *state  = keys_state;
+unsigned long *ktime  = keys_time;
+boolean       *signal = signals;
+for (byte key = 0; key < KEYS_NUMBER; key++)
+{
+    for (byte state_index = 0; state_index < 2; state_index++)
     {
-        for (byte state_index = 0; state_index < 2; state_index++)
+        switch (*state)
         {
-            switch (*state)
+        case KEY_OFF:
+            if (state_index == 0 && *signal)
             {
-            case KEY_OFF:
-                if (state_index == 0 && *signal)
-                {
-                    *state = KEY_START;
-                    *ktime = micros();            //MUDANÇA PARA MICROS
-                }
-                break;
-            case KEY_START:
-                if (state_index == 0 && !*signal)
-                {
-                    *state = KEY_OFF;
-                    break;
-                }
-                if (state_index == 1 && *signal)
-                {
-                    *state = KEY_ON;
-                    unsigned long t= micros() - *ktime;  //MUDANDO PARA MICROS E DEFINIR A DIFERANÇA ANTES DE ENVIAR PARA EVITAR ERRO DE TEMPO
-                    send_midi_event(0x90, key, t);
-                }
-                break;
-            case KEY_ON:
-                if (state_index == 1 && !*signal)
-                {
-                    *state = KEY_RELEASED;
-                    *ktime = micros();                   //MUDANDO PARA MICROS
-                }
-                break;
-            case KEY_RELEASED:
-                if (state_index == 0 && !*signal)
-                {
-                    if (pedal)
-                    {
-                        *state = KEY_SUSTAINED;
-                        break;
-                    }
-                    *state = KEY_OFF;
-                    unsigned long t= micros() - *ktime;  //MUDANDO PARA MICROS E DEFINIR A DIFERANÇA ANTES DE ENVIAR PARA EVITAR ERRO DE TEMPO
-                    send_midi_event(0x80, key, t);      //MUDANDO PARA MICROS
-                }
-                break;
-            case KEY_SUSTAINED:
-                if (!pedal)
-                {
-                    *state = KEY_OFF;
-                    send_midi_event(0x80, key, MAX_TIME_MS);
-                }
-                if (state_index == 0 && *signal)
-                {
-                    *state = KEY_SUSTAINED_RESTART;
-                    *ktime = micros();                 //MUDANDO PARA MICROS
-                }
-                break;
-            case KEY_SUSTAINED_RESTART:
-                if (state_index == 0 && !*signal)
-                {
-                    *state = KEY_SUSTAINED;
-                    digitalWrite(13, HIGH);
-                    break;
-                }
-                if (state_index == 1 && *signal)
-                {
-                    *state = KEY_ON;
-                    send_midi_event(0x80, key, MAX_TIME_MS);
-                    send_midi_event(0x90, key, micros() - *ktime);  //MUDANDO PARA MICROS
-                }
+                *state = KEY_START;
+                *ktime = micros();
+            }
+            break;
+        case KEY_START:
+            if (state_index == 0 && !*signal)
+            {
+                *state = KEY_OFF;
                 break;
             }
-            signal++;
+            if (state_index == 1 && *signal)
+            {
+                *state = KEY_ON;
+                unsigned long t= micros() - *ktime;
+                send_midi_event(0x90, key,t);
+            }
+            break;
+        case KEY_ON:
+            if (state_index == 1 && !*signal)
+            {
+                *state = KEY_RELEASED;
+                *ktime = micros();
+            }
+            break;
+        case KEY_RELEASED:
+            if (state_index == 0 && !*signal)
+            {
+                *state = KEY_OFF;
+                unsigned long t= micros() - *ktime;
+                send_midi_event(0x80, key,t);
+            }
+            break;
         }
-        state++;
-        ktime++;
+        signal++;
     }
+    state++;
+    ktime++;
+}
 }
