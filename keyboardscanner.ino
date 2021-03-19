@@ -28,8 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define PEDAL_SUS 21
 
 //POTENCIOMETROS
-const int N_POTS = 2; //* número total de pots (slide e rotativo)
-const int POT_ARDUINO_PIN[N_POTS] = {A0, A1}; //* pinos de cada pot conectado diretamente ao Arduino
+const int N_POTS = 3; //* número total de pots (slide e rotativo)
+const int POT_ARDUINO_PIN[N_POTS] = {A0, A1, A2}; //* pinos de cada pot conectado diretamente ao Arduino
 int potCState[N_POTS] = {0}; // estado atual da porta analogica
 int potPState[N_POTS] = {0}; // estado previo da porta analogica
 int potVar = 0; // variacao entre o valor do estado previo e o atual da porta analogica
@@ -40,9 +40,13 @@ const int varThreshold = 100; //* threshold para a variacao no sinal do potencio
 boolean potMoving = true; // se o potenciometro esta se movendo
 unsigned long PTime[N_POTS] = {0}; // tempo armazenado anteriormente
 unsigned long timer[N_POTS] = {0}; // armazena o tempo que passou desde que o timer foi zerado
+boolean pit =false;
+boolean mod=false;
 
 byte cc = 1; //* O mais baixo MIDI CC a ser usado
 void potentiometers() {
+
+
  /* //Debug somente
      for (int i = 0; i < N_POTS; i++) {
       //Serial.print(potCState[i]); Serial.print(" ");
@@ -54,10 +58,15 @@ void potentiometers() {
  for (int i = 0; i < N_POTS; i++) { // Faz o loop de todos os potenciômetros
 
     potCState[i] = analogRead(POT_ARDUINO_PIN[i]);
-
+ 
+    if(i==0){
     midiCState[i] = map(potCState[i], 450, 880, 0, 127); // Mapeia a leitura do potCState para um valor utilizável em midi
+    }
     if(i==1){
     midiCState[i] = map(potCState[i], 215, 795, 0, 127);  
+    }
+    if(i==2){ 
+    midiCState[i] = map(potCState[i], 0, 1023, 0, 127); 
     }
 
     potVar = abs(potCState[i] - potPState[i]); // Calcula o valor absoluto entre a diferença entre o estado atual e o anterior do pot
@@ -77,15 +86,34 @@ void potentiometers() {
 
     if (potMoving == true) { // Se o potenciômetro ainda estiver em movimento, envie control change
       if (midiPState[i] != midiCState[i]) {
+         if(i==0){// reservado para modulation wheel  
+         send_midi_eventcc(0xB0, cc+ i, midiCState[i]);
+         mod=false;
+         }
          if(i==1){//reservado para pitchbend
          send_midi_eventcc(0xE0, cc+ i, midiCState[i]);
-         }else{// reservado para modulation wheel
-         send_midi_eventcc(0xB0, cc+ i, midiCState[i]);
+         pit=false;
+         }
+         if(i==2){
+          
+         send_midi_eventcc(0xB0, 7, midiCState[i]); 
          }
         potPState[i] = potCState[i]; // Armazena a leitura atual do potenciômetro para comparar com a próxima
         midiPState[i] = midiCState[i];
       }
     }
+    if(potMoving==false){
+      if(midiCState[1]>55  && midiCState[1]<66 && pit==false){
+      midiCState[1]=64;
+      send_midi_eventcc(0xE0, 1, midiCState[1]);
+      pit=true;
+    }
+    if(midiCState[0]<10 && mod ==false){
+      midiCState[0]=0;
+      send_midi_eventcc(0xB0, 1, midiCState[0]);
+      mod=true;
+    }
+    }    
   }
 }
 
